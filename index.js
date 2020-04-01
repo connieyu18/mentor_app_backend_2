@@ -2,11 +2,13 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const router = express.Router();
-// const bcrypt = require("bcryptjs");
-// const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const server = require("http").Server(app);
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+require('dotenv/config');
+const axios = require("axios");
+mongoose.set('useUnifiedTopology', true);
 
 mongoose.connect("mongodb://localhost:27017/mentorDB", {
   useNewUrlParser: true
@@ -30,7 +32,8 @@ server.listen(port, () => {
 
 module.exports = {
   app,
-  router
-  // jwt,
+  router,
+  jwt,
+  axios
   // io
 };

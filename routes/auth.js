@@ -1,4 +1,6 @@
-const { router } = require("../index");
+const { router, jwt, authFunctions } = require("../index");
+
+const { verifyAndGetId,verifyAndGetIdAndOtherInfo } = require("../services/authFunctions.js");
 
 var User = require("../models/user.js");
 
@@ -17,35 +19,51 @@ router.post("/signup", (req, res) => {
         created_at: new Date()
       });
 
-      new_user.save(function(err) {
+      new_user.save(function(err, result) {
         if (err) {
           res.json({ error: "Something went wrong while creating new user" });
         } else {
-          // come back for jwt token
-          res.json({ token: "af;askjdfskadnf" });
+          let token = jwt.sign(
+            {
+              id: result._id, //payload datas,
+              display_name: result.display_name,
+              email: result.email
+            },
+            process.env.SECRET_KEY
+          );
+
+          res.json({ token });
         }
       });
     }
   });
 });
 
-// router.post("/sign-up-form", (req, res) => {
-//   let { _id, profile_type, tech_languages, home_city, experience } = req.body;
-//   User.findOne({ _id }).then(user => {
-//     if (user) {
-//       User.updateOne({ _id: _id }, { $set: { 
-//         profile_type: profile_type, 
-//         tech_languages: tech_languages,
-//         home_city:home_city,
-//         experience :experience,
-//       } 
-//     });
-//     } else {
-//       res.json({ error: "User email doesn't match" });
-//     }
-//   });
-// });
+router.put("/signupform", (req, res) => {
+  let { token, profile_type, tech_languages, home_city, experience } = req.body;
+  let userInfo = verifyAndGetIdAndOtherInfo(token);
 
-
-
+  User
+    .updateOne(
+      { _id: userInfo.id},
+      {
+        $set: {
+          profile_type: profile_type,
+          tech_languages: tech_languages,
+          home_city: home_city,
+          experience: experience
+        }
+      }
+    )
+    .then(() =>{
+      userInfo.profile_type = profile_type;
+      userInfo.tech_languages = tech_languages;
+      userInfo.home_city = home_city;
+      userInfo.experience = experience;
+      userInfo.tech_languages= tech_languages;
+      userInfo.home_city = home_city;
+      let newToken = jwt.sign(userInfo, process.env.SECRET_KEY);
+      res.json({token: newToken})
+    })
+})
 module.exports = router;

@@ -1,20 +1,20 @@
-var mongoose = require('mongoose')
+var mongoose = require("mongoose");
+const Request = require('./request').schema;
 
 const AvailabilitySchema = new mongoose.Schema({
-    m_id: String,
-    t_id: String,
-    method: String,
-    date_start: String,
-    date_end: String,
-    time_start: String,
-    time_end: String,
-    name: String,
-    m_email: String,
-    t_email: String,
-    denied: [],
-    confirmed: String,
-    pending: []
-  });
+  person_id: String,
+  display_name: String,
+  email: String,
+  method: String,
+  start_date: String,
+  end_date: String,
+  start_time: String,
+  end_time: String,
+  requests:[Request],
+  denied:[],
+  confirmed: [],
+  pending: [],
+});
 
-var Availability = mongoose.model('Availability', AvailabilitySchema);
+var Availability = mongoose.model("Availability", AvailabilitySchema);
 module.exports = Availability;
