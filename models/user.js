@@ -1,6 +1,6 @@
 var mongoose = require("mongoose");
 var validator = require("validator");
-
+const Availability=require("./availability").schema;
 //create a new schema/blueprint that will be save in mongodb database
 
 var UserSchema = new mongoose.Schema({
@@ -15,7 +15,8 @@ var UserSchema = new mongoose.Schema({
   },
   tech_languages: [],
   experience: String,
-  created_at: String
+  created_at: String, 
+  availabilities:[Availability]
 });
 //   password_confirm: { type: String, required: true, validate: {
 //     validator: function(el) {

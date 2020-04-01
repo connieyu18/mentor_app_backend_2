@@ -14,6 +14,7 @@ const AvailabilitySchema = new mongoose.Schema({
   denied:[],
   confirmed: [],
   pending: [],
+  created_at:String,
 });
 
 var Availability = mongoose.model("Availability", AvailabilitySchema);

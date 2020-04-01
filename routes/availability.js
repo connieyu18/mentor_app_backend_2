@@ -1,28 +1,55 @@
 const { router, jwt, authFunctions } = require("../index");
-const { verifyAndGetId, verifyAndGetIdAndOtherInfo } = require("../services/authFunctions.js");
+const {
+  verifyAndGetId,
+  verifyAndGetIdAndOtherInfo
+} = require("../services/authFunctions.js");
 var Availability = require("../models/availability.js");
 var User = require("../models/user.js");
 
-
-router.post("/create", (req, res)=> {
-    let {start_date, end_date, start_time, end_time}= req.body;
+router.post("/create", (req, res) => {
+  let { start_date, end_date, start_time, end_time } = req.body;
   let token = req.headers.authorization;
-  let new_availability=new Availability({
-    start_date, end_date, start_time, end_time
-  })
-  new_availability.save(function(err,result){
-      if(err){
-          res.json({error: "Something went wrong while creating new availability" })
-      }else{
-          res.json("Succesfully added new availability", result)
-      }
-  })
-//   let userInfo = verifyAndGetIdAndOtherInfo(token);
-//   let new_availability= new Availability({
+  let userInfo = verifyAndGetIdAndOtherInfo(token);
+  console.log("token" + userInfo.id)
+  let new_availability = new Availability({
+    display_name: userInfo.display_name,
+    email:userInfo.email, 
+    start_date:start_date,
+    end_date:end_date,
+    start_time:start_time,
+    end_time:end_time, 
+    created_at: new Date(), 
 
-//   })
-//   Availability.save
-    res.end();
-})
+  });
+  User.find({_id:userInfo.id}).then(user=>{
+    new_availability.save(function(err, result) {
+        if (err) {
+          throw err;
+          res.json({
+            error: "Something went wrong while creating new availability"
+          });
+          return;
+        } else {
+            console.log("success")
+            User.updateOne({_id:userInfo.id},{$push:{availabilities:result}})
+            .then(()=>console.log("updated User Availability"))
+        }
+      });
+  })
+  
+  //   let userInfo = verifyAndGetIdAndOtherInfo(token);
+  //   let new_availability= new Availability({
+
+  //   })
+  //   Availability.save
+  res.end();
+});
+
+// router.get('/getAvail', (res, req)=>{
+
+// })
 
 module.exports = router;
+
+
+
