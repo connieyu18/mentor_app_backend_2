@@ -13,9 +13,25 @@ const AvailabilitySchema = new mongoose.Schema({
   requests:[Request],
   denied:[],
   confirmed: [],
-  pending: [],
+  // pending: [],
   created_at:String,
 });
 
+// export class Availability {
+//   bid:string;
+//   method:string;
+//   date:string;
+//   timeend:string;
+//   name:string = null;
+//   bemail:string;
+//   cemail:string;
+//   formatted_address:string = null;
+//   lng:number = null;
+//   lat:number = null;
+//   split_address:[]=[];
+//   denied:[]=[];
+//   confirmed:string="";
+//   pending:[]=[];
+// }
 var Availability = mongoose.model("Availability", AvailabilitySchema);
 module.exports = Availability;

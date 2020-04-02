@@ -1,13 +1,11 @@
 var mongoose = require('mongoose')
 
-
 const RequestSchema = new mongoose.Schema({
-    person_id:String, 
-    other_person_id:String,
-    requested_date: String,
-    requested_time: String,
-    other_person_email: String,
-})
+  sender_id: String,
+  recipient_id: String,
+  requested_date: String,
+  requested_time: String,
+});
 
 var Request = mongoose.model('Request', RequestSchema);
 module.exports = Request;
