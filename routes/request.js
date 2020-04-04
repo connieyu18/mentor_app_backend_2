@@ -43,52 +43,29 @@ router.post("/create-request", (req, res) => {
   var recipient_objectId = mongoose.Types.ObjectId(recipient_id);
   // let la= ObjectId.fromString( availability_id)
   // Availability.findById(avail_objectId).then(availability => {
-    new_request.save()
-      .then((result)=>{
-        console.log("CREATED"+result)
-        Availability.findOne({ _id: avail_objectId},(err,availability)=>{
-          console.log("AVAI"+availability)
-          if(availability){
-              availability.meetings_requests.push(new_request)
-              availability.save(); 
-          }
-        })
-      })
-
-      // if (err) {
-      //   throw err;
-      // } else {
-      //   //push the meetings request to teh availability
-      //   Availability.findOneAndUpdate(
-      //     { _id: avail_objectId },
-      //     { $push: { meetings_requests: result } },
-      //     { new: true },
-      //     function(err, doc) {
-      //       User.updateOne(
-      //         { _id: recipient_objectId },
-      //         { $set: { availabilities: doc } }
-      //       ).then(res => console.log("FFF" + res));
-      //     }
-      //   );
-        // .then(avail_result=>
-        //   console.log("DDDD"+ avail_result))
-        // User.updateOne(
-        //   { _id: recipient_objectId},
-        //   { $set: { availabilities: avail_result } }
-        // )
-        // ).then((res)=>console.log("FFF"+ res))
-    //   }
-    // });
-  // });
-});
-
-router.get("/getRequests", (req, res) => {
-  let { token } = req.query;
-  let secret_key = process.env.SECRET_KEY;
-  let userInfo = verifyAndGetIdAndOtherInfo(token);
-  User.findById(userInfo.id, function(err, user) {
-    console.log(user.availabilities);
+  new_request.save().then(result => {
+    console.log("CREATED" + result);
+    Availability.findOne({ _id: avail_objectId }, (err, availability) => {
+      if (availability) {
+        availability.meetings_requests.push(new_request);
+        availability.save();
+      }
+    });
+    User.findOne({ _id: recipient_id },
+      (err, user) => {
+        if (user) {
+          user.new_meeting_requests.push(new_request);
+          user.save();
+        }
+      });
   });
 });
+
+// router.get("/getRequests", (req, res) => {
+//   let { token } = req.query;
+//   let secret_key = process.env.SECRET_KEY;
+//   let userInfo = verifyAndGetIdAndOtherInfo(token);
+//   User.findOne({_id:useInfo.id})
+// });
 
 module.exports = router;

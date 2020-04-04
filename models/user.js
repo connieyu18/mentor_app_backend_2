@@ -17,7 +17,8 @@ var UserSchema = new mongoose.Schema({
   tech_languages: {type: Array, required:false},
   experience: String,
   created_at: String, 
-  availabilities:[Availability]
+  availabilities:[Availability], 
+  new_meeting_requests:[],
   // availabilities:{
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: "Availability"
