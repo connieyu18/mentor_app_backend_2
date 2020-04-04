@@ -20,25 +20,16 @@ router.post("/create", (req, res) => {
     created_at: new Date(),
     method: method
   });
-  User.find({ _id: userInfo.id }).then(user => {
-    new_availability.save(function(err, result) {
-      if (err) {
-        throw err;
-        res.json({
-          error: "Something went wrong while creating new availability"
-        });
-      } else {
-        User.findOneAndUpdate(
-          { _id: userInfo.id },
-          { $push: { availabilities: result } },{ new: true },
-          function(err, doc){
-            console.log("DOC"+ doc)
-            res.json({user:doc})
-           }
-        ).catch(err=>{throw(err)})
-      }
-    });
-  });
+    new_availability.save()
+    .then((result)=>{
+      User.findOne({_id:userInfo.id},(err,user)=>{
+        if(user){
+          user.availabilities.push(new_availability);
+          user.save();
+          res.json({avail:result})
+        }
+      })
+    })
 });
 
 
