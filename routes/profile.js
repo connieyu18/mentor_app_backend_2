@@ -17,4 +17,16 @@ router.get("/getUserProfile", (req, res)=> {
     })
 });
 
+router.get("/getOtherUserProfile", (req, res)=> {
+    let {_id} = req.query;
+    User
+      .findOne({ _id:_id})
+      .then(user =>{
+        if(user){
+          res.json({user});
+        } else {
+          res.json({ error: "Invalid token" });
+        }
+      })
+  });
 module.exports = router;

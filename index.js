@@ -4,7 +4,7 @@ const cors = require("cors");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const server = require("http").Server(app);
-const bodyParser = require("body-parser");
+const bodyParser = require("body-parser");//body-parser helps to parse the request and create the req.body object
 const mongoose = require("mongoose");
 require('dotenv/config');
 const axios = require("axios");
@@ -17,12 +17,15 @@ mongoose.connect("mongodb://localhost:27017/mentorDB", {
 app.use(
   express.urlencoded({
     extended: true
-  })
+  })// parse requests of content-type - application/x-www-form-urlencoded
+
 );
 app.use(express.json());
 app.use(cors());
 
-app.use(bodyParser.json());
+
+app.use(bodyParser.json());// parse requests of content-type - application/json
+
 
 const port = process.env.PORT || 5000;
 

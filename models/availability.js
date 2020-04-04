@@ -1,4 +1,4 @@
-var mongoose = require("mongoose");
+var mongoose = require("mongoose"), Schema= mongoose.Schema;
 const Request = require('./request').schema;
 
 const AvailabilitySchema = new mongoose.Schema({
@@ -10,10 +10,10 @@ const AvailabilitySchema = new mongoose.Schema({
   end_date: String,
   start_time: String,
   end_time: String,
-  requests:[Request],
-  denied:[],
-  confirmed: [],
-  // pending: [],
+  meetings_requests:[Request],
+  meetings_denied:[],
+  meetings_confirmed: [],
+  meetings_pending: [],
   created_at:String,
 });
 

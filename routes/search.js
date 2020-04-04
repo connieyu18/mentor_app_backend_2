@@ -27,13 +27,11 @@ router.get("/getAllResults", (req, res) => {
   let token = req.headers.authorization;
   let inputData = req.query;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
-  console.log(userInfo, "this is your own info");
   User.find({
     _id: { $ne: userInfo.id }, //ne=not equal
     profile_type: { $ne: userInfo.profile_type}
     // profile_type: { $not: { $regex: userInfo.profile_type } }
   }).then(collection => {
-    console.log(collection);
     res.json({ collection });
   });
 });
