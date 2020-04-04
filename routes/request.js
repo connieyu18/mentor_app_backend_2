@@ -42,23 +42,34 @@ router.post("/create-request", (req, res) => {
   var avail_objectId = mongoose.Types.ObjectId(availability_id);
   var recipient_objectId = mongoose.Types.ObjectId(recipient_id);
   // let la= ObjectId.fromString( availability_id)
-  Availability.findById(avail_objectId).then(availability => {
-    new_request.save(function(err, result) {
-      if (err) {
-        throw err;
-      } else {
-        //push the meetings request to teh availability
-        Availability.findOneAndUpdate(
-          { _id: avail_objectId },
-          { $push: { meetings_requests: result } },
-          { new: true },
-          function(err, doc) {
-            User.updateOne(
-              { _id: recipient_objectId },
-              { $set: { availabilities: doc } }
-            ).then(res => console.log("FFF" + res));
+  // Availability.findById(avail_objectId).then(availability => {
+    new_request.save()
+      .then((result)=>{
+        console.log("CREATED"+result)
+        Availability.findOne({ _id: avail_objectId},(err,availability)=>{
+          console.log("AVAI"+availability)
+          if(availability){
+              availability.meetings_requests.push(new_request)
+              availability.save(); 
           }
-        );
+        })
+      })
+
+      // if (err) {
+      //   throw err;
+      // } else {
+      //   //push the meetings request to teh availability
+      //   Availability.findOneAndUpdate(
+      //     { _id: avail_objectId },
+      //     { $push: { meetings_requests: result } },
+      //     { new: true },
+      //     function(err, doc) {
+      //       User.updateOne(
+      //         { _id: recipient_objectId },
+      //         { $set: { availabilities: doc } }
+      //       ).then(res => console.log("FFF" + res));
+      //     }
+      //   );
         // .then(avail_result=>
         //   console.log("DDDD"+ avail_result))
         // User.updateOne(
@@ -66,9 +77,9 @@ router.post("/create-request", (req, res) => {
         //   { $set: { availabilities: avail_result } }
         // )
         // ).then((res)=>console.log("FFF"+ res))
-      }
-    });
-  });
+    //   }
+    // });
+  // });
 });
 
 router.get("/getRequests", (req, res) => {
