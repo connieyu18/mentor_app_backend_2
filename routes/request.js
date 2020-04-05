@@ -51,13 +51,12 @@ router.post("/create-request", (req, res) => {
         availability.save();
       }
     });
-    User.findOne({ _id: recipient_id },
-      (err, user) => {
-        if (user) {
-          user.new_meeting_requests.push(new_request);
-          user.save();
-        }
-      });
+    User.findOne({ _id: recipient_id }, (err, user) => {
+      if (user) {
+        user.new_meeting_requests.push(new_request);
+        user.save();
+      }
+    });
   });
 });
 
@@ -66,6 +65,63 @@ router.post("/create-request", (req, res) => {
 //   let secret_key = process.env.SECRET_KEY;
 //   let userInfo = verifyAndGetIdAndOtherInfo(token);
 //   User.findOne({_id:useInfo.id})
+// });
+
+router.get("/getRequests", (req, res) => {
+  let token = req.headers.authorization;
+  let userInfo = verifyAndGetIdAndOtherInfo(token);
+  var data = [];
+  Availability.find({
+    $and: [
+      { email: userInfo.email },
+      { meetings_requests: { $exists: true, $ne: [] } }
+    ]
+  }).then(availabilities => {
+    if (availabilities) {
+      // var data={};
+      // availabilities.forEach(function(doc){
+      //   data["availability"]=doc
+      // })
+      res.send({ availabilities });
+      console.log("DATA" + availabilities);
+      // {
+      //   for(var i=0;i<availabilities.length;i++){
+      //     data.push( availabilities[i])
+      //   }
+      //   console.log("DATA"+typeof(data))
+      //   res.json({ availabilities });
+      // }
+    }
+  });
+});
+
+router.post("/confirmRequest", (req, res) => {
+  let { request_id, token, confirm_status } = req.body;
+  let userInfo = verifyAndGetIdAndOtherInfo(token);
+  if (confirm_status === "confirm") {
+    Request.findOne({_id:request_id},(err,request)=>{
+      Availability.findOne(
+        { "meetings_requests._id": request_id },
+        (err, avail) => {
+          if (avail) {
+            avail.meetings_confirmed.push(request_id);
+            avail.meetings_requests.remove({_id:request_id})
+            avail.save();
+            console.log(avail);
+          }
+        }
+      );
+    })
+  }
+  // .then(avail => {
+  //   console.log("AVAIL"+avail)
+  //   if(avail){
+  //     // console.log("AA"+avail.meetings_confirmed)
+  //     avail.meetings_confirmed.push(request_id)
+  //     avail.save();
+});
+//     });
+//   }
 // });
 
 module.exports = router;
