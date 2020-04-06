@@ -48,15 +48,15 @@ router.post("/create-request", (req, res) => {
     Availability.findOne({ _id: avail_objectId }, (err, availability) => {
       if (availability) {
         availability.meetings_requests.push(new_request);
-        availability.save();
+        // availability.save();
       }
     });
-    User.findOne({ _id: recipient_id }, (err, user) => {
-      if (user) {
-        user.new_meeting_requests.push(new_request);
-        user.save();
-      }
-    });
+    // User.findOne({ _id: recipient_id }, (err, user) => {
+    //   if (user) {
+    //     user.new_meeting_requests.push(new_request);
+    //     user.save();
+    //   }
+    // });
   });
 });
 
@@ -95,31 +95,54 @@ router.get("/getRequests", (req, res) => {
   });
 });
 
+router.get("/getConfirmedMeetings", (req, res) => {
+  let token = req.headers.authorization;
+  let userInfo = verifyAndGetIdAndOtherInfo(token);
+  var data = [];
+  Availability.find({
+    $and: [
+      { email: userInfo.email },
+      { meetings_confirmed: { $exists: true, $ne: [] } }
+    ]
+  }).then(availabilities => {
+    if (availabilities) {
+      res.send({ availabilities });
+      console.log("DATA22" + availabilities);
+    }
+  });
+});
+
 router.post("/confirmRequest", (req, res) => {
   let { request_id, token, confirm_status } = req.body;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
-  if (confirm_status === "confirm") {
-    Request.findOne({_id:request_id},(err,request)=>{
-      Availability.findOne(
-        { "meetings_requests._id": request_id },
-        (err, avail) => {
-          if (avail) {
-            avail.meetings_confirmed.push(request_id);
-            avail.meetings_requests.remove({_id:request_id})
-            avail.save();
+  Request.findOne({ _id: request_id }, (err, request) => {
+    Availability.findOne(
+      { "meetings_requests._id": request_id },
+      (err, avail) => {
+        if (avail) {
+          if (confirm_status === "confirm") {
+            avail.meetings_confirmed.push(request);
+            avail.meetings_requests.remove({ _id: request_id });
             console.log(avail);
+          } else {
+            avail.meetings_denied.push(request);
+            avail.meetings_requests.remove({ _id: request_id });
           }
+          avail.save();
         }
-      );
-    })
-  }
-  // .then(avail => {
-  //   console.log("AVAIL"+avail)
-  //   if(avail){
-  //     // console.log("AA"+avail.meetings_confirmed)
-  //     avail.meetings_confirmed.push(request_id)
-  //     avail.save();
+      }
+    );
+  }).catch(err => {
+    throw err;
+  });
 });
+// .then(avail => {
+//   console.log("AVAIL"+avail)
+//   if(avail){
+//     // console.log("AA"+avail.meetings_confirmed)
+//     avail.meetings_confirmed.push(request_id)
+//     avail.save();
+
 //     });
 //   }
 // });
