@@ -19,6 +19,12 @@ var UserSchema = new mongoose.Schema({
   created_at: String, 
   availabilities:[Availability], 
   new_meeting_requests:[],
+  confirmed_meetings:[],
+  denied_meetings:[],
+  pending_meetings:[],
+  friend_requests:[], 
+  denied_friend_requests:[], 
+  confirmed_friend_requests:[],
   // availabilities:{
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: "Availability"

@@ -37,23 +37,25 @@ router.post("/create", (req, res) => {
 router.get("/getAvail", (req, res) => {
   let token = req.headers.authorization;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
-  User.find({ _id: userInfo.id }).then(user => {
+  User.findOne({ _id: userInfo.id }).then(user => {
+    if(user){
+      res.json({ availabilities: user.availabilities });
+    }
     // console.log("this is users!!!", user[0].availabilities)
-    res.json({ availabilities: user[0].availabilities });
   });
 });
 
 
 
-router.put("/delete", (req, res) => {
-  let token = req.body.token;
-  let userInfo = verifyAndGetIdAndOtherInfo(token);
-  let { selectedRowKeys } = req.body;
-  for(var i=0; i<selectedRowKeys.length; i++){
-//   User.update({ _id: userInfo.id },{$set:{availabilities:}}
-//        { $pull: {"availabilities":{$eq:selectedRowKeys[i]}}}
-//   );
-  }
-});
+// router.put("/delete", (req, res) => {
+//   let token = req.body.token;
+//   let userInfo = verifyAndGetIdAndOtherInfo(token);
+//   let { selectedRowKeys } = req.body;
+//   for(var i=0; i<selectedRowKeys.length; i++){
+// //   User.update({ _id: userInfo.id },{$set:{availabilities:}}
+// //        { $pull: {"availabilities":{$eq:selectedRowKeys[i]}}}
+// //   );
+//   }
+// });
 
 module.exports = router;

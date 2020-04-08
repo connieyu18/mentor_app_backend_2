@@ -19,10 +19,6 @@ router.post("/create-request", (req, res) => {
     requested_time,
     recipient_id,
     availability_id
-    // display_name,
-    // home_city,
-    // tech_languages,
-    // experience
   } = req.body;
   let token = req.body.token;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
@@ -36,36 +32,35 @@ router.post("/create-request", (req, res) => {
     sender_name: userInfo.display_name,
     sender_home_city: userInfo.home_city,
     sender_tech_lang: userInfo.tech_languages,
-    sender_experience: userInfo.experience
+    sender_experience: userInfo.experience,
+    method: "",
+    avail_creator: ""
   });
-  // var avail_objectId = new ObjectId(availability_id);
   var avail_objectId = mongoose.Types.ObjectId(availability_id);
   var recipient_objectId = mongoose.Types.ObjectId(recipient_id);
-  // let la= ObjectId.fromString( availability_id)
-  // Availability.findById(avail_objectId).then(availability => {
   new_request.save().then(result => {
-    console.log("CREATED" + result);
     Availability.findOne({ _id: avail_objectId }, (err, availability) => {
-      if (availability) {
-        availability.meetings_requests.push(new_request);
-        // availability.save();
-      }
+      Request.updateOne(
+        { _id: result._id },
+        { $set: { "method": availability.method, "avail_creator":availability.display_name } }
+      ).then(res => console.log("successfully! updated method"));
     });
-    // User.findOne({ _id: recipient_id }, (err, user) => {
+  });
+  Availability.findOne({ _id: avail_objectId }, (err, availability) => {
+    if (availability) {
+      console.log("before" + availability);
+      availability.meetings_requests.push(new_request);
+      availability.save();
+      console.log("after" + availability);
+    }
+    // User.findOne({ _id: userInfo.id }, (err, user) => {
     //   if (user) {
-    //     user.new_meeting_requests.push(new_request);
+    //     user.pending_meetings.push(new_request); //TODO:need to remove when confirmed
     //     user.save();
     //   }
     // });
   });
 });
-
-// router.get("/getRequests", (req, res) => {
-//   let { token } = req.query;
-//   let secret_key = process.env.SECRET_KEY;
-//   let userInfo = verifyAndGetIdAndOtherInfo(token);
-//   User.findOne({_id:useInfo.id})
-// });
 
 router.get("/getRequests", (req, res) => {
   let token = req.headers.authorization;
@@ -84,13 +79,6 @@ router.get("/getRequests", (req, res) => {
       // })
       res.send({ availabilities });
       console.log("DATA" + availabilities);
-      // {
-      //   for(var i=0;i<availabilities.length;i++){
-      //     data.push( availabilities[i])
-      //   }
-      //   console.log("DATA"+typeof(data))
-      //   res.json({ availabilities });
-      // }
     }
   });
 });
@@ -99,15 +87,10 @@ router.get("/getConfirmedMeetings", (req, res) => {
   let token = req.headers.authorization;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
   var data = [];
-  Availability.find({
-    $and: [
-      { email: userInfo.email },
-      { meetings_confirmed: { $exists: true, $ne: [] } }
-    ]
-  }).then(availabilities => {
-    if (availabilities) {
-      res.send({ availabilities });
-      console.log("DATA22" + availabilities);
+  console.log("DDD" + userInfo);
+  User.findOne({ id: userInfo.id }).then(user => {
+    if (user) {
+      res.json({ confirmed_meetings: user.confirmed_meetings });
     }
   });
 });
@@ -115,27 +98,56 @@ router.get("/getConfirmedMeetings", (req, res) => {
 router.post("/confirmRequest", (req, res) => {
   let { request_id, token, confirm_status } = req.body;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
-  Request.findOne({ _id: request_id }, (err, request) => {
-    Availability.findOne(
-      { "meetings_requests._id": request_id },
-      (err, avail) => {
-        if (avail) {
-          if (confirm_status === "confirm") {
-            avail.meetings_confirmed.push(request);
-            avail.meetings_requests.remove({ _id: request_id });
-            console.log(avail);
-          } else {
-            avail.meetings_denied.push(request);
-            avail.meetings_requests.remove({ _id: request_id });
-          }
-          avail.save();
+  Availability.findOne(
+    { "meetings_requests._id": request_id },
+    (err, avail) => {
+      if (avail) {
+        if (confirm_status === "confirm") {
+          // avail.meetings_confirmed.push(request); //TODO:not sure if you need this
+          avail.meetings_requests.remove({ _id: request_id });
+        } else {
+          // avail.meetings_denied.push(request);//TODO:not sure if you need this
+          avail.meetings_requests.remove({ _id: request_id });
         }
+        avail.save();
+        console.log("AVA" + avail);
       }
-    );
-  }).catch(err => {
-    throw err;
+    }
+  );
+  Request.findOne({ _id: request_id }, (err, request) => {
+    User.find({ _id: { $in: [userInfo.id, request.sender_id] } }, function(
+      err,
+      user
+    ) {
+      if (user) {
+        console.log("thisis" + user);
+        if (confirm_status === "confirm") {
+          user.forEach(e => {
+            // if (e._id == userInfo.id) {
+            //   User.confirmed_meetings.updateOne(
+            //     { _id: userInfo.id },
+            //     { $set: { avail_creator: e.display_name} }
+            //   ).then(res => console.log(res,"successfully !!!!!!!"))
+            // }
+            e.confirmed_meetings.push(request);
+            e.save();
+            console.log("ID" + e._id);
+          });
+        } else {
+          user.forEach(e => {
+            e.denied_meetings.push(request);
+            e.save();
+          });
+        }
+
+        console.log("AAA" + user);
+      }
+    }).catch(err => {
+      throw err;
+    });
   });
 });
+
 // .then(avail => {
 //   console.log("AVAIL"+avail)
 //   if(avail){

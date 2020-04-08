@@ -12,7 +12,9 @@ const RequestSchema = new mongoose.Schema({
   sender_experience:String,
   requested_date: String,
   requested_time: String,
-  created_at: String
+  created_at: String, 
+  method:String,
+  avail_creator:String,
 });
 
 
