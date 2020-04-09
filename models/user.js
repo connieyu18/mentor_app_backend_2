@@ -1,6 +1,7 @@
 var mongoose = require("mongoose");
 var validator = require("validator");
 const Availability=require("./availability").schema;
+const Schema=mongoose.Schema;
 const bcrypt = require("bcryptjs")
 //create a new schema/blueprint that will be save in mongodb database
 
@@ -23,8 +24,10 @@ var UserSchema = new mongoose.Schema({
   denied_meetings:[],
   pending_meetings:[],
   friend_requests:[], 
+  pending_friend_requests:[],
   denied_friend_requests:[], 
   confirmed_friend_requests:[],
+  projects:[{type:Schema.Types.ObjectId,ref:'Projects'}],
   // availabilities:{
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: "Availability"

@@ -65,7 +65,7 @@ router.put("/signupform", (req, res) => {
     userInfo.tech_languages = tech_languages;
     userInfo.home_city = home_city;
     let newToken = jwt.sign(userInfo, process.env.SECRET_KEY);
-    res.json({ token: newToken });
+    res.json({ token: newToken, user_id:userInfo.id });
   });
 });
 
