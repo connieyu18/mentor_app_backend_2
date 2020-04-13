@@ -56,6 +56,23 @@ router.get("/getProjects", (req, res) => {
   });
 });
 
+
+router.get("/getProjectsOtherUser", (req, res) => {
+  let { token,other_user_name } = req.query;
+  let secret_key = process.env.SECRET_KEY;
+  let userInfo = verifyAndGetIdAndOtherInfo(token);
+  var data = [];
+  Project.find({
+    user_name:JSON.parse(other_user_name).display_name ,
+  }).then((projects) => {
+    if (projects) {
+      console.log("rp"+projects)
+      res.send({ projects: projects });
+    }
+  });
+});
+
+
 router.post("/rating", (req, res) => {
   let { rating, token, project_id } = req.body;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
@@ -68,6 +85,26 @@ router.post("/rating", (req, res) => {
   });
   Project.find({
     user_name: userInfo.display_name,
+  }).then((projects) => {
+    if (projects) {
+      res.send({ projects: projects });
+    }
+  });
+});
+
+
+router.post("/rating_other_user", (req, res) => {
+  let { rating, token, project_id,other_user_name } = req.body;
+  let userInfo = verifyAndGetIdAndOtherInfo(token);
+  var objectID = mongoose.Types.ObjectId(project_id);
+  Project.findOneAndUpdate(
+    { _id: project_id },
+    { $set: { rating: rating + 1 } }
+  ).catch((err) => {
+    throw err;
+  });
+  Project.find({
+    user_name: other_user_name.display_name,
   }).then((projects) => {
     if (projects) {
       res.send({ projects: projects });
@@ -92,11 +129,39 @@ router.post("/new_comment", (req, res) => {
   })
     .then((projects) => {
       if (projects) {
-        console.log("FFFFFF" + projects[index].comments.push({
+        projects[index].comments.push({
           comment_id: new ObjectID(),
           comment: comments,
           comment_by: userInfo.display_name,
-        }));
+        });
+        res.json({ projects: projects });
+      }
+    })
+    .catch((err) => console.log(err));
+});
+
+router.post("/new_comment_other_user", (req, res) => {
+  let { comments, token, project_id,index,other_user_name } = req.body;
+  console.log("Comments"+comments)
+  let userInfo = verifyAndGetIdAndOtherInfo(token);
+  Project.findOne({ _id: project_id }).then((project) => {
+    project.comments.push({
+      comment_id: new ObjectID(),
+      comment: comments,
+      comment_by: userInfo.display_name,
+    });
+    project.save();
+  });
+  Project.find({
+    user_name: other_user_name.display_name ,
+  })
+    .then((projects) => {
+      if (projects) {
+         projects[index].comments.push({
+          comment_id: new ObjectID(),
+          comment: comments,
+          comment_by: userInfo.display_name,
+        });
         res.json({ projects: projects });
       }
     })
