@@ -1,19 +1,29 @@
 var mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
+// const User=require("./user").schema;
+var User = require("../models/user.js");
 
 var ProjectSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+  },
   user_id: { type: String, required: true },
   user_name: { type: String, required: true },
   project_name: { type: String, required: true },
   project_description: { type: String, required: true },
-  project_link: { type: String, required: true },
+  project_link: { type: String},
   project_img: { type: String },
   comments: [
     {
-      comment_by: {
-        type: String,
-        required: [true, "Review must be written by a user"],
+      comment_id:{
+        type:String
       },
-      comment: { type: String, required: true },
+      comment_by: {
+        type: String
+      },
+      comment: { type: String },
       comment_createdAt: {
         type: Date,
         default: Date.now,
@@ -22,12 +32,11 @@ var ProjectSchema = new mongoose.Schema({
   ],
   rating: {
     type: Number,
-    min: 1,
-    max: 5,
+    default: 0,
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: new Date(),
   },
 });
 

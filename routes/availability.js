@@ -47,15 +47,26 @@ router.get("/getAvail", (req, res) => {
 
 
 
-// router.put("/delete", (req, res) => {
-//   let token = req.body.token;
-//   let userInfo = verifyAndGetIdAndOtherInfo(token);
-//   let { selectedRowKeys } = req.body;
-//   for(var i=0; i<selectedRowKeys.length; i++){
-// //   User.update({ _id: userInfo.id },{$set:{availabilities:}}
-// //        { $pull: {"availabilities":{$eq:selectedRowKeys[i]}}}
-// //   );
-//   }
-// });
+router.put("/delete", (req, res) => {
+  let token = req.body.token;
+  let userInfo = verifyAndGetIdAndOtherInfo(token);
+  let { selectedRowKeys } = req.body;
+  User.findOne({_id: userInfo.id}).then(user=>{
+    for(var i=0; i<selectedRowKeys.length; i++){
+      console.log("aa"+ selectedRowKeys[i])
+        user.availabilities.map((e,index)=>{
+          if(e._id== selectedRowKeys[i]){
+            user.availabilities.splice(index,1)
+            user.save();
+          }
+          }
+        )
+    }
+    res.send({user:user})
+  })
+
+ 
+
+});
 
 module.exports = router;

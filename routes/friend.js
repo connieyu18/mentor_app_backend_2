@@ -14,7 +14,8 @@ router.post("/add", (req, res) => {
   let token = req.body.token;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
   User.find({ _id: { $in: [userInfo.id, friend_id] } }, (err, user) => {
-    console.log("IN HERE!!!");
+    const friend_filtered1=user.filter(e=>e._id==friend_id)
+    console.log("inheree333"+friend_filtered1[0].profile_image_url)
     user.forEach((e) => {
       e.pending_friend_requests.push({
         friend_request_id: new ObjectID(),
@@ -22,6 +23,7 @@ router.post("/add", (req, res) => {
         friend_name: display_name,
         requester_id: userInfo.id,
         requester_name: userInfo.display_name,
+        profile_image_url:friend_filtered1[0].profile_image_url,
         created_at: new Date(),
       });
       console.log("results" + e);
@@ -57,11 +59,16 @@ router.post("/confirm", (req, res) => {
   ).then((res) => console.log(res));
   User.find({ _id: { $in: [requester_id, friend_id] } }, function (err, user) {
     if (user) {
-      console.log("FFFFDDDD");
       user.forEach((e) => {
-        if(e===userInfo.id){
-        e.pending_friend_requests.remove({ "friend_request_id": friend_request_object_id})
+        if(e._id==userInfo.id){
+          e.pending_friend_requests.map((item,index)=>{
+            if(item.friend_request_id==friend_request_id){
+              e.pending_friend_requests.splice(index,1)
+              e.save();
+            }
+          })
         }
+        let friend_filtered=user.filter(i=>i._id==requester_id)
         if (confirmFriendStatus === "accept") {
           console.log("accept!!");
           e.confirmed_friend_requests.push({
@@ -69,6 +76,7 @@ router.post("/confirm", (req, res) => {
             friend_name: userInfo.display_name,
             requester_id: requester_id,
             requester_name: requester_name,
+            profile_image_url:friend_filtered[0].profile_image_url,
             created_at: new Date(),
           });
           e.save();
@@ -79,6 +87,7 @@ router.post("/confirm", (req, res) => {
             friend_name: userInfo.display_name,
             requester_id: requester_id,
             requester_name: requester_name,
+            profile_image_url:friend_filtered[0].profile_image_url,
             created_at: new Date(),
           });
         }

@@ -44,7 +44,7 @@ router.post("/signup", (req, res) => {
 });
 
 router.put("/signupform", (req, res) => {
-  let { token, profile_type, tech_languages, home_city, experience } = req.body;
+  let { token, profile_type, tech_languages, home_city, img_url,experience } = req.body;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
 
   User.updateOne(
@@ -54,7 +54,8 @@ router.put("/signupform", (req, res) => {
         profile_type: profile_type,
         tech_languages: tech_languages,
         home_city: home_city,
-        experience: experience
+        experience: experience,
+        profile_image_url:img_url
       }
     }
   ).then(() => {
@@ -64,6 +65,7 @@ router.put("/signupform", (req, res) => {
     userInfo.experience = experience;
     userInfo.tech_languages = tech_languages;
     userInfo.home_city = home_city;
+    userInfo.img_url=img_url;
     let newToken = jwt.sign(userInfo, process.env.SECRET_KEY);
     res.json({ token: newToken, user_id:userInfo.id });
   });
