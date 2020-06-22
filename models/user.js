@@ -3,10 +3,7 @@ const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
 
 const Availability = require("./availability").schema;
-// const Project = require("./project").schema;
 var Project = require("../models/project");
-
-//create a new schema/blueprint that will be save in mongodb database
 
 var UserSchema = new mongoose.Schema({
   display_name: { type: String, required: true },
@@ -30,26 +27,8 @@ var UserSchema = new mongoose.Schema({
   pending_friend_requests: [],
   denied_friend_requests: [],
   confirmed_friend_requests: [],
-  projects:[],
-  // projects: [
-  //   {
-  //     type: mongoose.Schema.ObjectId,
-  //     ref: "Project",
-  //   },
-  // ], // availabilities:{
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "Availability"
-  // }
+  projects: [],
 });
-//   password_confirm: { type: String, required: true, validate: {
-//     validator: function(el) {
-//       return el === this.password;
-//     }, message:'Passwords are not the same'
-//   }},
-
-//create a new collection called user, it will make user plural in monogod
 
 var User = mongoose.model("User", UserSchema);
 module.exports = User;
-
-//   user.save();

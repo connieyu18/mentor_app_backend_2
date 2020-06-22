@@ -1,5 +1,4 @@
 var mongoose = require("mongoose");
-// var ObjectID = require("mongodb").ObjectID;
 const { MongoClient, ObjectID } = require("mongodb");
 
 const { router, jwt, authFunctions } = require("../index");
@@ -14,8 +13,7 @@ router.post("/add", (req, res) => {
   let token = req.body.token;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
   User.find({ _id: { $in: [userInfo.id, friend_id] } }, (err, user) => {
-    const friend_filtered1=user.filter(e=>e._id==friend_id)
-    console.log("inheree333"+friend_filtered1[0].profile_image_url)
+    const friend_filtered1 = user.filter((e) => e._id == friend_id);
     user.forEach((e) => {
       e.pending_friend_requests.push({
         friend_request_id: new ObjectID(),
@@ -23,10 +21,9 @@ router.post("/add", (req, res) => {
         friend_name: display_name,
         requester_id: userInfo.id,
         requester_name: userInfo.display_name,
-        profile_image_url:friend_filtered1[0].profile_image_url,
+        profile_image_url: userInfo.profile_image_url,
         created_at: new Date(),
       });
-      console.log("results" + e);
       e.save();
       res.end();
     });
@@ -34,7 +31,6 @@ router.post("/add", (req, res) => {
 });
 
 router.post("/confirm", (req, res) => {
-  console.log("IN HERE22!!!");
   const {
     confirmFriendStatus,
     friend_request_id,
@@ -43,7 +39,6 @@ router.post("/confirm", (req, res) => {
     friend_id,
     friend_name,
   } = req.body;
-  console.log("FFF222" + friend_request_id);
   let token = req.body.token;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
   User.findOne(
@@ -52,42 +47,41 @@ router.post("/confirm", (req, res) => {
     },
     (err, user) => {
       if (user) {
-        console.log("Updated!!!!!!!!" +user);
-        user.pending_friend_requests.remove({ "friend_request_id": friend_request_object_id})
+        user.pending_friend_requests.remove({
+          friend_request_id: friend_request_object_id,
+        });
       }
     }
   ).then((res) => console.log(res));
   User.find({ _id: { $in: [requester_id, friend_id] } }, function (err, user) {
     if (user) {
       user.forEach((e) => {
-        if(e._id==userInfo.id){
-          e.pending_friend_requests.map((item,index)=>{
-            if(item.friend_request_id==friend_request_id){
-              e.pending_friend_requests.splice(index,1)
+        if (e._id == userInfo.id) {
+          e.pending_friend_requests.map((item, index) => {
+            if (item.friend_request_id == friend_request_id) {
+              e.pending_friend_requests.splice(index, 1);
               e.save();
             }
-          })
+          });
         }
-        let friend_filtered=user.filter(i=>i._id==requester_id)
+        let friend_filtered = user.filter((i) => i._id == requester_id);
         if (confirmFriendStatus === "accept") {
-          console.log("accept!!");
           e.confirmed_friend_requests.push({
             friend_id: userInfo.id,
             friend_name: userInfo.display_name,
             requester_id: requester_id,
             requester_name: requester_name,
-            profile_image_url:friend_filtered[0].profile_image_url,
+            profile_image_url: friend_filtered[0].profile_image_url,
             created_at: new Date(),
           });
           e.save();
         } else {
-          console.log("denied!!");
           e.denied_friend_requests.push({
             friend_id: userInfo.id,
             friend_name: userInfo.display_name,
             requester_id: requester_id,
             requester_name: requester_name,
-            profile_image_url:friend_filtered[0].profile_image_url,
+            profile_image_url: friend_filtered[0].profile_image_url,
             created_at: new Date(),
           });
         }
@@ -95,25 +89,7 @@ router.post("/confirm", (req, res) => {
     }
   });
   var friend_request_object_id = mongoose.Types.ObjectId(friend_request_id);
-  console.log("cccc" + friend_request_object_id);
-
-  // User.findOne(
-  //   {
-  //     _id: requester_id,
-  //   },
-  //   (err, user) => {
-  //     if (user) {
-  //       console.log("Updated");
-  //       user.pending_friend_requests.remove({
-  //         friend_request_id: friend_request_id,
-  //       },function(err,res){console.log("jjj"+res)});
-  //     }
-  //   }
-  // );
   res.end();
-  // e.pending_friend_requests.remove({
-  //   "friend_request_id":friend_request_object_id,
-  // },(err,res)=>console.log("GGGGG"+res));
 });
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const { router, jwt, authFunctions } = require("../index");
 const {
   verifyAndGetId,
-  verifyAndGetIdAndOtherInfo
+  verifyAndGetIdAndOtherInfo,
 } = require("../services/authFunctions.js");
 var Availability = require("../models/availability.js");
 var User = require("../models/user.js");
@@ -18,55 +18,44 @@ router.post("/create", (req, res) => {
     start_time: start_time,
     end_time: end_time,
     created_at: new Date(),
-    method: method
+    method: method,
   });
-    new_availability.save()
-    .then((result)=>{
-      User.findOne({_id:userInfo.id},(err,user)=>{
-        if(user){
-          user.availabilities.push(new_availability);
-          user.save();
-          res.json({avail:result})
-        }
-      })
-    })
+  new_availability.save().then((result) => {
+    User.findOne({ _id: userInfo.id }, (err, user) => {
+      if (user) {
+        user.availabilities.push(new_availability);
+        user.save();
+        res.json({ avail: result });
+      }
+    });
+  });
 });
-
-
 
 router.get("/getAvail", (req, res) => {
   let token = req.headers.authorization;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
-  User.findOne({ _id: userInfo.id }).then(user => {
-    if(user){
+  User.findOne({ _id: userInfo.id }).then((user) => {
+    if (user) {
       res.json({ availabilities: user.availabilities });
     }
-    // console.log("this is users!!!", user[0].availabilities)
   });
 });
-
-
 
 router.put("/delete", (req, res) => {
   let token = req.body.token;
   let userInfo = verifyAndGetIdAndOtherInfo(token);
   let { selectedRowKeys } = req.body;
-  User.findOne({_id: userInfo.id}).then(user=>{
-    for(var i=0; i<selectedRowKeys.length; i++){
-      console.log("aa"+ selectedRowKeys[i])
-        user.availabilities.map((e,index)=>{
-          if(e._id== selectedRowKeys[i]){
-            user.availabilities.splice(index,1)
-            user.save();
-          }
-          }
-        )
+  User.findOne({ _id: userInfo.id }).then((user) => {
+    for (var i = 0; i < selectedRowKeys.length; i++) {
+      user.availabilities.map((e, index) => {
+        if (e._id == selectedRowKeys[i]) {
+          user.availabilities.splice(index, 1);
+          user.save();
+        }
+      });
     }
-    res.send({user:user})
-  })
-
- 
-
+    res.send({ user: user });
+  });
 });
 
 module.exports = router;

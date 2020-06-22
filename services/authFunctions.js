@@ -1,6 +1,4 @@
-const { 
-  jwt,
-} = require("../index");
+const { jwt } = require("../index");
 
 const verifyAndGetId = (token) => {
   let decodedId;
@@ -8,7 +6,7 @@ const verifyAndGetId = (token) => {
   jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
     if (err) {
       return;
-    } 
+    }
     decodedId = decoded.id;
   });
   return decodedId;
@@ -19,7 +17,7 @@ const verifyAndGetIdAndOtherInfo = (token) => {
   jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
     if (err) {
       return;
-    } 
+    }
     result = decoded;
   });
   return result;
@@ -27,5 +25,5 @@ const verifyAndGetIdAndOtherInfo = (token) => {
 
 module.exports = {
   verifyAndGetId,
-  verifyAndGetIdAndOtherInfo
-}
+  verifyAndGetIdAndOtherInfo,
+};
